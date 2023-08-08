@@ -1,3 +1,6 @@
+#include <string>
+
+#include "../../interface/GSM/Sim800L/sim.cpp"
 #include "../message/message.cpp"
 #include "../securite/aes-256-cbc/aes-256-cbc.cpp"
 #include "../securite/sha256/sha256.cpp"
