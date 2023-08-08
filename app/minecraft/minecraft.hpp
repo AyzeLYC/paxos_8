@@ -8,43 +8,37 @@
 #include "renderingEngine.hpp"
 #include "SimplexNoise.hpp"
 
-class Chunk
-{
+class Chunk {
     public:
-    int16_t x, y = 0;
-    void chunk(int16_t x, int16_t y)
-    {
-        this->x = x;
-        this->y = y;
-        for(int x = 0; x < 16; x++)
-            for(int y = 0; y < 16; y++)
-                for(int z = 0; z < 16; z++)
-                    data[x][y][z] = AIR;
-    }
-    uint8_t data[16][16][32] = {{{AIR}}}; // [x][y][z]
+        int16_t x, y = 0;
+        void chunk(int16_t x, int16_t y) {
+            this->x = x;
+            this->y = y;
+            for(int x = 0; x < 16; x++)
+                for(int y = 0; y < 16; y++)
+                    for(int z = 0; z < 16; z++)
+                        data[x][y][z] = AIR;
+        }
+        uint8_t data[16][16][32] = {{{AIR}}}; // [x][y][z]
 };
 
-class Minecraft : public App
-{
+class Minecraft : public App {
     public:
-    void launch();
-    std::vector<Chunk *> chunks;
-    void renderChunk(int index, LGFX_Sprite* buffer);
-    void renderBlock(int type, int x, int y, int z, LGFX_Sprite* buffer);
-    uint8_t isBlock(int x, int y, int z);
+        void launch();
+        std::vector<Chunk *> chunks;
+        void renderChunk(int index, LGFX_Sprite* buffer);
+        void renderBlock(int type, int x, int y, int z, LGFX_Sprite* buffer);
+        struct isBlock {int x, y, z;};
 
-    double cameraX, cameraY, cameraZ = 0;
-    double cameraRX, cameraRY, cameraRZ = 0;
-    RenderingEngine* render;
+        double cameraX, cameraY, cameraZ = 0;
+        double cameraRX, cameraRY, cameraRZ = 0;
+        RenderingEngine* render;
 };
 
-uint8_t Minecraft::isBlock(int x, int y, int z)
-{
-    for (int i = 0; i < chunks.size(); i++)
-    {
+uint8_t Minecraft::isBlock(int x, int y, int z) {
+    for (int i = 0; i < chunks.size(); i++) {
         Chunk* c = chunks[i];
-        if(c->x*16<=x && x<c->x*16+16 && c->y*16<=y && y<c->y*16+16)
-        {
+        if(c->x*16<=x && x<c->x*16+16 && c->y*16<=y && y<c->y*16+16) {
             x-=c->x*16;
             y-=c->y*16;
 
@@ -54,8 +48,7 @@ uint8_t Minecraft::isBlock(int x, int y, int z)
     return false;
 }
 
-void Minecraft::launch()
-{
+void Minecraft::launch() {
     LGFX_Sprite output(&tft_root);
     render = new RenderingEngine();
     output.setPsram(false);
@@ -64,8 +57,8 @@ void Minecraft::launch()
     Box keys(104, 382, 180, 76);
     Label* front = new Label(39, 0, 29, 34, "^");
     Label* back = new Label(39, 42, 29, 34, "v");
-    Label* right = new Label(0, 23, 34, 29, "<");
-    Label* left = new Label(72, 23, 34, 29, ">");
+    Label* right = new Label(0, 23, 34, 29, ">");
+    Label* left = new Label(72, 23, 34, 29, "<");
     Label* up = new Label(147, 0, 29, 34, "+");
     Label* down = new Label(147, 42, 29, 34, "-");
 
@@ -87,46 +80,35 @@ void Minecraft::launch()
     
     output.createSprite(320, 240);
 
-    for(int cx = 0; cx < 10; cx++)
-    {
-        for(int cy = 0; cy < 10; cy++)
-        {
+    for(int cx = 0; cx < 10; cx++) {
+        for(int cy = 0; cy < 10; cy++) {
             chunks.push_back((Chunk*) malloc(sizeof(Chunk)));
             chunks[chunks.size()-1]->chunk(cx,cy);
 
-            for(int x = 0; x < 16; x++)
-            {
-                for(int y = 0; y < 16; y++)
-                {
-                    for(int z = 1; z < 32; z++)
-                    {
+            for(int x = 0; x < 16; x++) {
+                for(int y = 0; y < 16; y++) {
+                    for(int z = 1; z < 32; z++) {
                         chunks[chunks.size()-1]->data[x][y][z] = AIR;
                     }
                 }
             }
 
-            for(int x = 0; x < 16; x++)
-            {
-                for(int y = 0; y < 16; y++)
-                {
+            for(int x = 0; x < 16; x++) {
+                for(int y = 0; y < 16; y++) {
                     uint16_t noi = (Get2DPerlinNoiseValue(x+(chunks[chunks.size()-1]->x*16), y+(chunks[chunks.size()-1]->y*16), 30)+1)*2;
-                    for(int z = 1; z < noi+5; z++)
-                    {
-                        if(noi+4==z)
-                        {
+                    for(int z = 1; z < noi+5; z++) {
+                        if(noi+4==z) {
                             chunks[chunks.size()-1]->data[x][y][z] = GRASS;
 
-                            if(rand()%128==1)
-                            {
-                                for(int z2 = z; z2-z<=3 || rand()%3; z2++)
-                                {
+                            if(rand()%128==1) {
+                                for(int z2 = z; z2-z<=3 || rand()%3; z2++) {
                                     chunks[chunks.size()-1]->data[x][y][z2] = WOOD;
                                     chunks[chunks.size()-1]->data[x][y][z2+1] = LEAVES;
                                 }
                             }
-                        }    
-                        else
+                        } else {
                             chunks[chunks.size()-1]->data[x][y][z] = DIRT;
+                        }:
                     }
                 }
             }
@@ -137,18 +119,15 @@ void Minecraft::launch()
     unsigned long timer = millis();
     unsigned long timer_m = millis();
 
-    while (true)
-    {
+    while (true) {
         {
             std::vector<int> chunks_indexs; // chunks index from farthest
 
-            for (int j = 0; j < chunks.size(); j++)
-            {
+            for (int j = 0; j < chunks.size(); j++) {
                 double distance_max = 0;
                 int index_max = 0;
 
-                for (int i = 0; i < chunks.size(); i++)
-                {
+                for (int i = 0; i < chunks.size(); i++) {
                     Chunk* ch = chunks[i];
 
                     bool pass = false;
@@ -157,8 +136,7 @@ void Minecraft::launch()
                         if(i == chunks_indexs[ii])
                             pass=true;
 
-                    if(!pass && pow((ch->x*16+8)-render->cameraX, 2) + pow((ch->y*16+8)-render->cameraY, 2)>distance_max)
-                    {
+                    if(!pass && pow((ch->x*16+8)-render->cameraX, 2) + pow((ch->y*16+8)-render->cameraY, 2)>distance_max) {
                         distance_max = pow((ch->x*16+8)-render->cameraX, 2) + pow((ch->y*16+8)-render->cameraY, 2);
                         index_max=i;
                     }
@@ -190,23 +168,19 @@ void Minecraft::launch()
         if(isBlock(isBlock(render->cameraX, render->cameraY, render->cameraZ-3-0.2)!=AIR && render->cameraX, render->cameraY, render->cameraZ-3)==WATER) // water
             render->cameraZ-=0.2;
 
-        if(right->isFocuced())
-        {
+        if(right->isFocuced()) {
             render->cameraX+=rotate(speed, 0, render->cameraRY, 0);
             render->cameraY+=rotate(speed, 0, render->cameraRY, 1);
         }
-        if(left->isFocuced())
-        {
+        if(left->isFocuced()) {
             render->cameraX+=rotate(-speed, 0, render->cameraRY, 0);
             render->cameraY+=rotate(-speed, 0, render->cameraRY, 1);
         }
-        if(front->isFocuced())
-        {
+        if(front->isFocuced()) {
             render->cameraX+=rotate(0, speed, render->cameraRY, 0);
             render->cameraY+=rotate(0, speed, render->cameraRY, 1);
         }
-        if(back->isFocuced())
-        {
+        if(back->isFocuced()) {
             render->cameraX+=rotate(0, -speed, render->cameraRY, 0);
             render->cameraY+=rotate(0, -speed, render->cameraRY, 1);
         }
@@ -215,13 +189,11 @@ void Minecraft::launch()
         if(down->isFocuced())
             render->cameraZ-=0.4;
         
-        if(touch.isSlidingHorizontally())
-        {
+        if(touch.isSlidingHorizontally()) {
             render->cameraRY+=radian(touch.isSlidingHorizontally()/3);
             touch.resetScrollHorizontal();
         }
-        if(touch.isSlidingVertically())
-        {
+        if(touch.isSlidingVertically()) {
             render->cameraRX-=radian(touch.isSlidingVertically()/3);
             touch.resetScrollVertical();
         }
@@ -231,8 +203,7 @@ void Minecraft::launch()
     free(chunks[0]);
 }
 
-void Minecraft::renderChunk(int index, LGFX_Sprite* buffer)
-{
+void Minecraft::renderChunk(int index, LGFX_Sprite* buffer) {
     //uint8_t indexs[16][16][32] = {{{0}}};
     uint16_t rex = chunks[index]->x*16, rey = chunks[index]->y*16; // relative coordinates chunk
 
@@ -241,52 +212,38 @@ void Minecraft::renderChunk(int index, LGFX_Sprite* buffer)
     int16_t pz = render->cameraZ;
     
     
-    for(int z = 0; z < pz; z++)
-    {
-        for(int y = 0; y < py && y<16 && y>=0; y++)
-        {
-            for(int x = 0; x < px && x<16 && x>=0; x++)
-            {
+    for(int z = 0; z < pz; z++) {
+        for(int y = 0; y < py && y<16 && y>=0; y++) {
+            for(int x = 0; x < px && x<16 && x>=0; x++) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
-            for(int x = 15; x >= px && x<16 && x>=0; x--)
-            {
+            for(int x = 15; x >= px && x<16 && x>=0; x--) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
         }
-        for(int y = 15; y >= py && y<16 && y>=0; y--)
-        {
-            for(int x = 0; x < px && x<16 && x>=0; x++)
-            {
+        for(int y = 15; y >= py && y<16 && y>=0; y--) {
+            for(int x = 0; x < px && x<16 && x>=0; x++) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
-            for(int x = 15; x >= px && x<16 && x>=0; x--)
-            {
+            for(int x = 15; x >= px && x<16 && x>=0; x--) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
         }
     }
-    for(int z = 15; z >= pz; z--)
-    {
-        for(int y = 0; y < py && y<16 && y>=0; y++)
-        {
-            for(int x = 0; x < px && x<16 && x>=0; x++)
-            {
+    for(int z = 15; z >= pz; z--) {
+        for(int y = 0; y < py && y<16 && y>=0; y++) {
+            for(int x = 0; x < px && x<16 && x>=0; x++) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
-            for(int x = 15; x >= px && x<16 && x>=0; x--)
-            {
+            for(int x = 15; x >= px && x<16 && x>=0; x--) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
         }
-        for(int y = 15; y >= py && y<16 && y>=0; y--)
-        {
-            for(int x = 0; x < px && x<16 && x>=0; x++)
-            {
+        for(int y = 15; y >= py && y<16 && y>=0; y--) {
+            for(int x = 0; x < px && x<16 && x>=0; x++) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
-            for(int x = 15; x >= px && x<16 && x>=0; x--)
-            {
+            for(int x = 15; x >= px && x<16 && x>=0; x--) {
                 renderBlock(chunks[index]->data[x][y][z], rex+x, rey+y, z, buffer);
             }
         }
@@ -298,53 +255,38 @@ void Minecraft::renderBlock(int type, int x, int y, int z, LGFX_Sprite* buffer)
     if(type == AIR)
         return;
 
-    if(render->cameraZ>z)
-    {
-        if(!isBlock(x, y, z+1) && textures[type][0])
-        {
+    if(render->cameraZ>z) {
+        if(!isBlock(x, y, z+1) && textures[type][0]) {
             render->triangles.push_back(new Triangle(x, y, z+1, x+1, y, z+1, x+1, y+1, z+1, textures[type][0]));
             render->triangles.push_back(new Triangle(x, y, z+1, x, y+1, z+1, x+1, y+1, z+1, textures[type][1]));
         }
-    }
-    else
-    {
-        if(!isBlock(x, y, z-1) && textures[type][2])
-        {
+    } else {
+        if(!isBlock(x, y, z-1) && textures[type][2]) {
             render->triangles.push_back(new Triangle(x, y, z, x+1, y, z, x+1, y+1, z, textures[type][2]));
             render->triangles.push_back(new Triangle(x, y, z, x, y+1, z, x+1, y+1, z, textures[type][3]));
         }
     }
 
 
-    if(render->cameraY<y)
-    {
-        if(!isBlock(x, y-1, z) && textures[type][2])
-        {
+    if(render->cameraY<y) {
+        if(!isBlock(x, y-1, z) && textures[type][2]) {
             render->triangles.push_back(new Triangle(x, y, z+1, x+1, y, z+1, x+1, y, z, textures[type][2]));
             render->triangles.push_back(new Triangle(x, y, z+1, x, y, z, x+1, y, z, textures[type][3]));
         }
-    }
-    else
-    {
-        if(!isBlock(x, y+1, z) && textures[type][2])
-        {
+    } else {
+        if(!isBlock(x, y+1, z) && textures[type][2]) {
             render->triangles.push_back(new Triangle(x, y+1, z+1, x+1, y+1, z+1, x+1, y+1, z, textures[type][2]));
             render->triangles.push_back(new Triangle(x, y+1, z+1, x, y+1, z, x+1, y+1, z, textures[type][3]));
         }
     }
 
-    if(render->cameraX>x)
-    {
-        if(!isBlock(x+1, y, z) && textures[type][2])
-        {
+    if(render->cameraX>x) {
+        if(!isBlock(x+1, y, z) && textures[type][2]) {
             render->triangles.push_back(new Triangle(x+1, y, z+1, x+1, y+1, z+1, x+1, y, z, textures[type][2]));
             render->triangles.push_back(new Triangle(x+1, y+1, z, x+1, y+1, z+1, x+1, y, z, textures[type][3]));
         }
-    }
-    else
-    {
-        if(!isBlock(x-1, y, z) && textures[type][2])
-        {
+    } else {
+        if(!isBlock(x-1, y, z) && textures[type][2]) {
             render->triangles.push_back(new Triangle(x, y, z+1, x, y+1, z+1, x, y, z, textures[type][2]));
             render->triangles.push_back(new Triangle(x, y+1, z, x, y+1, z+1, x, y, z, textures[type][3]));
         }
