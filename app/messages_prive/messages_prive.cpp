@@ -6,7 +6,7 @@
 #include "../securite/sha256/sha256.cpp"
 #include "../securite/secp256k1/secp256k1.cpp"
 
-void MP : main() {
+void MP::main() {
     
     while (!home_button.pressed()) {
 
